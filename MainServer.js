@@ -28,7 +28,7 @@ const startServer = async () => {
     )
 
     // app.use("/auth", require("./api/routes/users"))
-    app.get("/data", auth, async (req, res) => {
+    app.get("/test", async (req, res) => {
       try {
         const data = [
           {
@@ -48,7 +48,33 @@ const startServer = async () => {
           },
         ]
 
-        res.json({ data })
+        res.json(data)
+      } catch (error) {
+        res.status(500).json(`Data getting error: ${error.message}`)
+      }
+    })
+
+    app.get("/recipes", async (req, res) => {
+      try {
+        const data = [
+          {
+            id: "1",
+            name: "Jsim",
+            recipe: "Recipe 1",
+          },
+          {
+            id: "2",
+            name: "Andrew",
+            recipe: "Recipe 2",
+          },
+          {
+            id: "3",
+            name: "Tom",
+            recipe: "Recipe 3",
+          },
+        ]
+
+        res.json(data)
       } catch (error) {
         res.status(500).json(`Data getting error: ${error.message}`)
       }

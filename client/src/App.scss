@@ -5,6 +5,9 @@ $colors: (
   accent: #e2e2e2,
   dark: #333,
   title: rgb(165, 164, 164),
+  danger: #ca0b00,
+  warning: #f0d500,
+  bg-loader: rgba(211, 211, 211, 0.527),
 );
 $transitions: (
   sudden: 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
@@ -25,7 +28,43 @@ $transitions: (
   max-width: 100%;
   border-radius: 5px;
   background-color: white;
+  position: relative;
   box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.1), 0px 10px 14px rgba(0, 0, 0, 0.1);
+  &__loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: getColor(bg-loader);
+    z-index: 7;
+    opacity: 0;
+    visibility: hidden;
+    &--spin {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+  &__spiner {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 5px double rgba(0, 0, 0, 0.05);
+    border-left-color: grey;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    animation: spin getTransition(spin);
+  }
+  @keyframes spin {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
   &__title {
     text-align: center;
     padding: 5px 0px 10px 0px;
@@ -120,10 +159,53 @@ $transitions: (
   &__msg-container {
     display: flex;
     align-items: center;
+    position: relative;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    opacity: 1;
+    transition: getTransition(smooth);
+    z-index: 3;
+    &--close {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.8);
+    }
+    &:hover .field__msg {
+      transform: scale(1);
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+  &__msg-icon {
+    color: getColor(danger);
   }
   &__msg {
+    position: absolute;
+    width: 100px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: getColor(dark);
+    color: white;
+    font-size: 0.75em;
+    transition: getTransition(sudden);
+    z-index: 3;
+    text-align: center;
+    right: 26px;
+    transform: scale(0.9);
+    visibility: hidden;
+    opacity: 0;
   }
   &__triangle {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    border: 8px solid transparent;
+    border-left-color: getColor(dark);
+    right: -16px;
+    top: 50%;
+    transform: translateY(-50%);
   }
   &__input {
     width: 100%;
@@ -135,7 +217,10 @@ $transitions: (
     border-radius: 5px;
     transition: getTransition(smooth);
     box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.2);
-    border: 1px solid white;
-    outline-color: getColor(primary);
+    border: 1.5px solid white;
+    outline-color: grey;
+    &--error {
+      border-color: getColor(danger);
+    }
   }
 }
