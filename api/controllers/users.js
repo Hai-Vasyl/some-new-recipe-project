@@ -5,10 +5,10 @@ const jwt = require("jsonwebtoken")
 
 const getTokens = (userId) => {
   const { REFRESH_SECRET, ACCESS_SECRET } = process.env
-  const accessToken = jwt.sign({ userId }, ACCESS_SECRET, { expiresIn: "1m" })
+  const accessToken = jwt.sign({ userId }, ACCESS_SECRET, { expiresIn: "3m" })
   const refreshToken = jwt.sign({ userId }, REFRESH_SECRET)
-  const { iat } = jwt.verify(accessToken, ACCESS_SECRET)
-  return { accessToken, refreshToken, iat }
+  const { exp } = jwt.verify(accessToken, ACCESS_SECRET)
+  return { accessToken, refreshToken, exp }
 }
 
 exports.users_login = async (req, res) => {
@@ -36,10 +36,10 @@ exports.users_login = async (req, res) => {
       })
     }
 
-    const { accessToken, refreshToken, iat } = getTokens(user._id)
+    const { accessToken, refreshToken, exp } = getTokens(user._id)
     await User.updateOne({ _id: user._id }, { refresh_token: refreshToken })
 
-    res.json({ accessToken, refreshToken, iat, user })
+    res.json({ accessToken, refreshToken, exp, user })
   } catch (error) {
     res.status(500).json(`Login error: ${error.message}`)
   }
@@ -96,10 +96,10 @@ exports.users_register = async (req, res) => {
     })
     const user = await newUser.save()
 
-    const { accessToken, refreshToken, iat } = getTokens(user._id)
+    const { accessToken, refreshToken, exp } = getTokens(user._id)
     await User.updateOne({ _id: user._id }, { refresh_token: refreshToken })
 
-    res.json({ accessToken, refreshToken, iat, user })
+    res.json({ accessToken, refreshToken, exp, user })
   } catch (error) {
     res.status(500).json(`Login error: ${error.message}`)
   }
@@ -123,12 +123,12 @@ exports.users_token = async (req, res) => {
       return res.status(401).json("Access denied!")
     }
 
-    const accessToken = jwt.sign({ userId: user_id }, ACCESS_SECRET, {
-      expiresIn: "1m",
+    const accessToken = jwt.sign({ userId: user_id.userId }, ACCESS_SECRET, {
+      expiresIn: "3m",
     })
-    const { iat } = jwt.verify(accessToken, ACCESS_SECRET)
+    const { exp } = jwt.verify(accessToken, ACCESS_SECRET)
 
-    res.json({ accessToken, iat })
+    res.json({ accessToken, exp })
   } catch (error) {
     res.status(500).json(`Refresh access token error: ${error.message}`)
   }

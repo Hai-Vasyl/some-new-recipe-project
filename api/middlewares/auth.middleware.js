@@ -9,16 +9,16 @@ module.exports = (req, res, next) => {
 
     const auth = req.headers.authorization
     if (!auth) {
-      res.status(401).json("Access denied!")
+      return res.status(401).json("Access denied!-")
     }
     const token = auth.split(" ")[1]
     if (!token) {
-      res.status(401).json("Access denied!")
+      return res.status(401).json("Access denied!")
     }
 
     const { userId } = jwt.verify(token, process.env.ACCESS_SECRET)
     if (!userId) {
-      res.status(401).json("Access denied!")
+      return res.status(401).json("Access denied!")
     }
     req.userId = userId
     next()

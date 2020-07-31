@@ -6,6 +6,7 @@ import {
   CLEAR_SPECIFIC_ERROR_AUTH,
   SET_ERROR_AUTH,
   SET_AUTH,
+  SET_NEW_ACCESS_TOKEN_AUTH,
 } from "./authTypes"
 
 const initialState = {
@@ -67,6 +68,14 @@ const authReducer = (state = initialState, action) => {
           ...state.error,
           { param: action.payload.param, msg: "Fill this field!" },
         ],
+      }
+    case SET_NEW_ACCESS_TOKEN_AUTH:
+      const { accessToken, exp } = action.payload
+      let authToken = { ...state.token, accessToken, exp }
+      localStorage.setItem("auth", JSON.stringify(authToken))
+      return {
+        ...state,
+        token: authToken,
       }
     default:
       return state

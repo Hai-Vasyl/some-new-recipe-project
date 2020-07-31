@@ -6,6 +6,7 @@ import {
   CLEAR_SPECIFIC_ERROR_AUTH,
   SET_ERROR_AUTH,
   SET_AUTH,
+  SET_NEW_ACCESS_TOKEN_AUTH,
 } from "./authTypes"
 
 export const fetchStart = () => {
@@ -45,5 +46,11 @@ export const setError = (param) => {
   return {
     type: SET_ERROR_AUTH,
     payload: param,
+  }
+}
+export const setNewAccessToken = (token) => {
+  return {
+    type: SET_NEW_ACCESS_TOKEN_AUTH,
+    payload: token,
   }
 }

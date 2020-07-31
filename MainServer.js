@@ -54,7 +54,7 @@ const startServer = async () => {
       }
     })
 
-    app.get("/recipes", async (req, res) => {
+    app.get("/recipes", auth, async (req, res) => {
       try {
         const data = [
           {

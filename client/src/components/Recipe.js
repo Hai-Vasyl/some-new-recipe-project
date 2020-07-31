@@ -5,7 +5,7 @@ import { fetchStart, fetchSuccess } from "../redux/recipe/recipeActions"
 
 function Recipe() {
   const { fetch } = useHTTP()
-  const state = useSelector((state) => state)
+  const { recipes, load } = useSelector((state) => state.recipe)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -19,7 +19,19 @@ function Recipe() {
     )
   }, [dispatch, fetch])
 
-  return <div>{console.log(state)}</div>
+  const recipesJSX = recipes.map((item) => {
+    return (
+      <div key={item.id}>
+        <div style={{ color: "red" }}>{item.name}</div>
+        <div>{item.recipe}</div>
+      </div>
+    )
+  })
+
+  if (load) {
+    return <div>LOADING</div>
+  }
+  return <div>{recipesJSX}</div>
 }
 
 export default Recipe
