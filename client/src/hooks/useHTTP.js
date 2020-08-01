@@ -8,39 +8,96 @@ function useHTTP() {
   const isDevelopment = true
 
   const fetch = useCallback(
-    ({ url, method, data, options }, isAuth) => {
-      const host = isDevelopment
-        ? `http://localhost:${isAuth ? "4000" : "5000"}`
-        : ""
+    (
+      { url, method, data, options: { isProtectedData = true, ...options } },
+      isAuth
+    ) => {
+      const makeRequest = async (url, method, data, token, isAuth) => {
+        const host = isDevelopment
+          ? `http://localhost:${isAuth ? "4000" : "5000"}`
+          : ""
+
+        const res = await axios({
+          url: `${host}${url}`,
+          method,
+          data,
+          headers: token && {
+            Authorization: `Basic ${token}`,
+          },
+        })
+
+        return res.data
+      }
+
+      const checkValidAccessToken = async (next = null) => {
+        if (token && Date.now() >= token.exp * 1000) {
+          const data = await makeRequest(
+            "/auth/token",
+            "post",
+            { refreshToken: token.refreshToken, userId: token.user._id },
+            null,
+            true
+          )
+
+          next && next(setNewAccessToken(data))
+          return data.accessToken
+        }
+        return token.accessToken
+      }
+
+      if (options.isLocalDataStorage) {
+        return (async function () {
+          try {
+            const accessToken = await checkValidAccessToken()
+            const resData = await makeRequest(
+              url,
+              method,
+              data,
+              isProtectedData ? accessToken : null
+            )
+            return resData
+          } catch (error) {
+            return console.log("Loacal storage data fetch error: ", error)
+          }
+        })()
+      }
       return async (dispatch) => {
         try {
           dispatch(options.fetchStart())
-          let tempToken = token.accessToken
+          // let accessToken = token.accessToken
 
-          if (Date.now() >= token.exp * 1000) {
-            const res = await axios({
-              url: "http://localhost:4000/auth/token",
-              method: "post",
-              data: {
-                refreshToken: token.refreshToken,
-                userId: token.user._id,
-              },
-            })
-            const data = res.data
-            dispatch(setNewAccessToken(data))
-            tempToken = data.accessToken
-          }
+          // if (token && (Date.now() >= token.exp * 1000)) {
+          //   const data = await makeRequest(
+          //     "/auth/token",
+          //     "post",
+          //     { refreshToken: token.refreshToken, userId: token.user._id },
+          //     null,
+          //     true
+          //   )
 
-          const res = await axios({
-            url: `${host}${url}`,
+          //   dispatch(setNewAccessToken(data))
+          //   accessToken = data.accessToken
+          // }
+
+          const accessToken = await checkValidAccessToken(dispatch)
+
+          const resData = await makeRequest(
+            url,
             method,
             data,
-            headers: tempToken && {
-              Authorization: `Basic ${tempToken}`,
-            },
-          })
+            isProtectedData ? accessToken : null,
+            isAuth
+          )
+          // const res = await axios({
+          //   url: `${host}${url}`,
+          //   method,
+          //   data,
+          //   headers: tempToken && {
+          //     Authorization: `Basic ${tempToken}`,
+          //   },
+          // })
 
-          dispatch(options.fetchSuccess({ data: res.data, options }))
+          dispatch(options.fetchSuccess({ data: resData, options }))
         } catch (error) {
           console.log(error)
           options.fetchFalure &&
@@ -50,6 +107,7 @@ function useHTTP() {
     },
     [isDevelopment, token]
   )
+
   return { fetch }
 }
 
